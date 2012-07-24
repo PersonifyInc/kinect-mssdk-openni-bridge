@@ -39,6 +39,9 @@ class MSRKinectDepthGeneratorDepthPixelProcessor
 public:
 	void Process(USHORT d, XnDepthPixel* dp, XnInt32 ratio)
 	{
+		// Reset unknown values to 0 to ensure that we don't confuse too far and unknown
+		if (d == NUI_DEPTH_DEPTH_UNKNOWN_VALUE) d = 0;
+
 		d >>= NUI_IMAGE_PLAYER_INDEX_SHIFT;
 		*dp = d;
 		if (ratio == 2) {
