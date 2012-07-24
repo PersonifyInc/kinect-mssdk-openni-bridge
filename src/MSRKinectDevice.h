@@ -96,4 +96,31 @@ public:
 		}
 	}
 
+    virtual XnStatus GetIntProperty(const XnChar* name, XnUInt64 &val) const
+    {
+        if (strcmp(name, PROP_DEVICE_CAMERA_ANGLE_VERTICAL) == 0) {
+            LONG angleDeg = 0;
+            HRESULT ret = NuiCameraElevationGetAngle(&angleDeg);
+            val = angleDeg;
+        }
+        else {
+            return xn::ModuleDevice::GetIntProperty(name, val);
+        }
+        return XN_STATUS_OK;
+    }
+
+    virtual XnStatus SetIntProperty(const XnChar* name, XnUInt64 val)
+    {
+        if (strcmp(name, PROP_DEVICE_CAMERA_ANGLE_VERTICAL) == 0) {
+            LONG angleDeg = (LONG)val;
+            if (NUI_CAMERA_ELEVATION_MINIMUM <= val && val <= NUI_CAMERA_ELEVATION_MAXIMUM) {
+                HRESULT ret = NuiCameraElevationSetAngle(angleDeg);
+            }
+        }
+        else {
+            return xn::ModuleDevice::SetIntProperty(name, val);
+        }
+
+        return XN_STATUS_OK;
+    }
 };

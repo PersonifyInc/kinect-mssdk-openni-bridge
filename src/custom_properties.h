@@ -34,6 +34,8 @@
 
 // IntProperty for all node types: Camera angle in degrees relative to the gravity. Use after generation started.
 #define PROP_COMMON_CAMERA_ELEVATION_ANGLE "cameraElevationAngle"
+// IntProperty for Device node to get/adjust camera elevation. Compatible with Nuvixa changes to OpenNI/SensorKinect
+#define PROP_DEVICE_CAMERA_ANGLE_VERTICAL "CameraAngleVertical"
 // IntProperty for all node types: Get pointer value to INuiSensor that is ast to XnUInt64. Use after generation started. Read-only.
 #define PROP_COMMON_NUI_SENSOR_POINTER "nuiSensorPointer"
 
