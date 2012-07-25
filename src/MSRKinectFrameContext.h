@@ -40,15 +40,22 @@ private:
 
 protected:
 	FrameClass m_frame;
+	USHORT* m_pRectFrame;
 	BOOL m_hasFrame;
 
 public:
 	MSRKinectFrameContext(MSRKinectRequirement* pRequirement, HANDLE hNextFrameEvent) : SuperClass(pRequirement, hNextFrameEvent), m_hasFrame(FALSE)
 	{
+		// TODO: don't hardcode size here
+		m_pRectFrame = new USHORT[640*480];
 	}
 	
 	virtual ~MSRKinectFrameContext()
 	{
+		if (m_pRectFrame) {
+			delete [] m_pRectFrame;
+			m_pRectFrame = NULL;
+		}
 	}
 
 	HRESULT GetNextFrame()
@@ -78,6 +85,12 @@ public:
 	FrameClass* GetFrame()
 	{
 		return &m_frame;
+	}
+
+	const USHORT* LockRectFrame()
+	{
+		LockFrame();
+		return m_pRectFrame;
 	}
 
 protected:

@@ -66,7 +66,59 @@ protected:
 
 	virtual HRESULT GetNextFrameImpl()
 	{
-		return m_pRequirement->GetSensor()->NuiImageStreamGetNextFrame(m_hStreamHandle, 100, &m_frame);
+        HRESULT hr;
+		hr = m_pRequirement->GetSensor()->NuiImageStreamGetNextFrame(m_hStreamHandle, 100, &m_frame);
+
+        // Do the rectification here -- it takes /forever/ and we don't want to hit it in the app
+        if (GetImageType() == NUI_IMAGE_TYPE_DEPTH && IsCalibrateViewPoint()) {
+            // put in m_pRectFrame
+            // TODO: remove hardcoding of depth frame dims here
+            //OutputDebugString(L"pre-nuiimagestreamgetnextframe registration\n");
+            LONG* coordinates = new LONG[640*480*2*sizeof(LONG)];
+            memset(m_pRectFrame, 0, 640 * 480 * sizeof(XnDepthPixel));
+
+            NUI_LOCKED_RECT lockedRect;
+            m_frame.pFrameTexture->LockRect(0, &lockedRect, NULL, 0);
+            USHORT* data = (USHORT*)lockedRect.pBits;
+            USHORT* sp = NULL;
+
+            // Try full frame registration
+            // First, get the mapping
+            int step = 1; // correct with our mirroring?
+            HRESULT hr = GetSensor()->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
+                NUI_IMAGE_RESOLUTION_640x480, NUI_IMAGE_RESOLUTION_640x480,
+                640*480, (USHORT*) data,
+                640*480*2, coordinates);
+
+            //OutputDebugString(L"nuiimagestreamgetnextframe registration -- get Nui coordinates\n");
+
+            // Then apply it
+            LONG ix, iy;
+            USHORT d;
+            for (XnUInt32 y = 0; y < 480; y++) {
+                sp = data + y * 640 + (step < 0 ? 640-1 : 0);
+                for (XnUInt32 x = 0; x < 640; x++) {
+                    d = (*sp);
+
+                    // Reset unknown values to 0 to ensure that we don't confuse too far and unknown
+            		if (d == NUI_DEPTH_DEPTH_UNKNOWN_VALUE) d = 0;
+
+                    ix = coordinates[(y*640 + x)*2];
+                    iy = coordinates[(y*640 + x)*2+1];
+                    if (ix >= 0 && ix <= LONG(640-2) && iy >= 0 && iy <= LONG(480-2)) {
+                        // Note: not really any faster than process call...
+                        *(m_pRectFrame + iy * 640 + ix) = d >> NUI_IMAGE_PLAYER_INDEX_SHIFT;
+                    }
+                    sp += step;
+                }
+            }
+
+            m_frame.pFrameTexture->UnlockRect(0);
+            delete [] coordinates;
+            //OutputDebugString(L"post-nuiimagestreamgetnextframe registration\n");
+        }
+
+        return hr;
 	}
 
 	virtual void ReleaseFrameImpl()

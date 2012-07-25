@@ -88,6 +88,12 @@ protected:
 				dp += destXRes * (ratio-1);
 			}
 		} else {
+#if 1
+			// Get the registered frame from down low
+			const USHORT* pRectFrame = m_pReader->LockRectFrame();
+			memcpy(m_pBuffer, pRectFrame, destXRes*destYRes*sizeof(XnDepthPixel));
+			m_pReader->UnlockFrame();
+#else
 			memset(m_pBuffer, 0, destXRes * destYRes);
 
 #if KINECTSDK_VER >= 100
@@ -132,6 +138,7 @@ protected:
 					sp += convRatio * step;
 				}
 			}
+#endif
 #endif
 		}
 
