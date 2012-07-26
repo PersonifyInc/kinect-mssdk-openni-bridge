@@ -100,14 +100,14 @@ protected:
                 for (XnUInt32 x = 0; x < 640; x++) {
                     d = (*sp);
 
-                    // Reset unknown values to 0 to ensure that we don't confuse too far and unknown
-            		if (d == NUI_DEPTH_DEPTH_UNKNOWN_VALUE) d = 0;
-
-                    ix = coordinates[(y*640 + x)*2];
-                    iy = coordinates[(y*640 + x)*2+1];
-                    if (ix >= 0 && ix <= LONG(640-2) && iy >= 0 && iy <= LONG(480-2)) {
-                        // Note: not really any faster than process call...
-                        *(m_pRectFrame + iy * 640 + ix) = d >> NUI_IMAGE_PLAYER_INDEX_SHIFT;
+                    // Reset unknown values to 0 (implicitly) to ensure that we don't confuse too far and unknown
+                    if ((d & ~NUI_IMAGE_PLAYER_INDEX_MASK) != NUI_DEPTH_DEPTH_UNKNOWN_VALUE) {
+                        ix = coordinates[(y*640 + x)*2];
+                        iy = coordinates[(y*640 + x)*2+1];
+                        if (ix >= 0 && ix <= LONG(640-2) && iy >= 0 && iy <= LONG(480-2)) {
+                            // Note: not really any faster than process call...
+                            *(m_pRectFrame + iy * 640 + ix) = d >> NUI_IMAGE_PLAYER_INDEX_SHIFT;
+                        }
                     }
                     sp += step;
                 }
