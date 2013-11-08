@@ -84,7 +84,7 @@ protected:
 
             // Try full frame registration
             // First, get the mapping
-            int step = 1; // correct with our mirroring?
+            int step = GetMirrorFactor(); // correct with our mirroring?
             HRESULT hr = GetSensor()->NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution(
                 NUI_IMAGE_RESOLUTION_640x480, NUI_IMAGE_RESOLUTION_640x480,
                 640*480, (USHORT*) data,
